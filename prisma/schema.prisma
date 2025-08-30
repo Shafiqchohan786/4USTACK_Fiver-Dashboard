@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
+}
+
+model FiverrData {
+  id            String  @id @map("_id") @default(auto()) @db.ObjectId
+  date          String  // yyyy-mm-dd
+  gigTitle      String
+  client        String
+  clicks        Int
+  impressions   Int
+  orders        Int
+  completed     Int
+  pending       Int
+  earning       Float
+  createdAt     DateTime @default(now())
+}
