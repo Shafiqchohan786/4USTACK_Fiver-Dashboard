@@ -46,7 +46,7 @@ export default function VendorComparison() {
   return (
     <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-3xl p-8 shadow-lg w-full max-w-3xl mx-auto border border-gray-200">
       <h3 className="font-bold text-xl text-gray-800 mb-6 text-center">
-        📊 Vendor Comparison
+        📊 Gigs Comparison
       </h3>
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={data} barSize={50}>

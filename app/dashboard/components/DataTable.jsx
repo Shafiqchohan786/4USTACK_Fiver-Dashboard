@@ -38,7 +38,7 @@ export default function DataTable() {
           <tr className="text-left text-gray-500 uppercase tracking-wider">
             <th className="py-3 px-4">Date</th>
             <th className="py-3 px-4">Gig Title</th>
-            <th className="py-3 px-4">Client</th>
+            <th className="py-3 px-4">Gig ID</th>
             <th className="py-3 px-4">Clicks</th>
             <th className="py-3 px-4">Impressions</th>
             <th className="py-3 px-4">Orders</th>

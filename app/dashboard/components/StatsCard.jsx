@@ -50,8 +50,8 @@ export default function StatsCards() {
       icon: <FiActivity size={28} />,
     },
     {
-      title: "Active Vendors",
-      value: stats.activeVendors,
+      title: "Total Impressions",
+      value: stats.totalImpressions,
       color: "from-green-400 to-green-600",
       icon: <FiUsers size={28} />,
     },
