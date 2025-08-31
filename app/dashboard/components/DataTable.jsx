@@ -32,7 +32,7 @@ export default function DataTable() {
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-md w-full overflow-x-auto">
-      <h3 className="font-semibold text-lg text-gray-800 mb-4">Fiverr Gigs Data</h3>
+      <h3 className="font-semibold text-lg text-gray-800 mb-4">Fiverr Gigs Data  (Last 7 Days)</h3>
       <table className="w-full text-sm border-collapse">
         <thead className="bg-gray-100 sticky top-0">
           <tr className="text-left text-gray-500 uppercase tracking-wider">

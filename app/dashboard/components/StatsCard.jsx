@@ -70,21 +70,28 @@ export default function StatsCards() {
   ];
 
   return (
-    <div className="flex flex-wrap justify-center gap-6 mt-28">
-      {cards.map((s, idx) => (
-        <div
-          key={idx}
-          className={`bg-gradient-to-r ${s.color} text-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 flex flex-col items-center justify-center w-52 md:w-60 lg:w-64`}
-        >
-          <div className="mb-4">{s.icon}</div>
-          <h4 className="text-sm md:text-base opacity-90 text-center truncate">
-            {s.title}
-          </h4>
-          <p className="text-2xl md:text-3xl font-bold mt-2 text-center truncate">
-            {s.value}
-          </p>
-        </div>
-      ))}
+    <div className="flex flex-col items-center mt-28">
+      <div className="flex flex-wrap justify-center gap-6">
+        {cards.map((s, idx) => (
+          <div
+            key={idx}
+            className={`bg-gradient-to-r ${s.color} text-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 flex flex-col items-center justify-center w-52 md:w-60 lg:w-64`}
+          >
+            <div className="mb-4">{s.icon}</div>
+            <h4 className="text-sm md:text-base opacity-90 text-center truncate">
+              {s.title}
+            </h4>
+            <p className="text-2xl md:text-3xl font-bold mt-2 text-center truncate">
+              {s.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Note below cards */}
+      <p className="text-xs text-gray-500 mt-4">
+        Note: This data represents the last 7 days.
+      </p>
     </div>
   );
 }

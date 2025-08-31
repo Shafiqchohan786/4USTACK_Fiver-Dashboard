@@ -3,81 +3,82 @@ import { prisma } from "@/lib/prisma";
 export const GET = async () => {
   try {
     const today = new Date();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(today.getDate() - 7);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30); // last 30 days
 
-    // Last 7 days ke dates ko DB format me convert karo (m/d/yy)
-    const getDbDateFormat = (d) => {
-      const month = d.getMonth() + 1; // 0-based
-      const day = d.getDate();
-      const year = String(d.getFullYear()).slice(-2); // last 2 digits
-      return `${month}/${day}/${year}`;
+    // Helper: DB date (m/d/yy) ko JS Date me convert karo
+    const parseDbDate = (str) => {
+      const parts = str.split("/");
+      if (parts.length === 3) {
+        const month = parseInt(parts[0], 10) - 1; // 0-based
+        const day = parseInt(parts[1], 10);
+        const year = 2000 + parseInt(parts[2], 10);
+        return new Date(year, month, day);
+      }
+      return null;
     };
 
-    const todayStr = getDbDateFormat(today);
-    const sevenDaysAgoStr = getDbDateFormat(sevenDaysAgo);
-
-    // Fetch all rows first
+    // Fetch all rows
     const allData = await prisma.fiverrData.findMany({
       orderBy: { date: "asc" },
     });
 
-    // Filter manually last 7 days ke data ke liye
-    const data = allData.filter(r => {
-      // Convert DB string date to comparable format
-      const parts = r.date.split("/");
-      if (parts.length === 3) {
-        const dbMonth = parseInt(parts[0]);
-        const dbDay = parseInt(parts[1]);
-        const dbYear = parseInt(parts[2]);
-        const dbDateComparable = new Date(2000 + dbYear, dbMonth - 1, dbDay);
-        return dbDateComparable >= sevenDaysAgo && dbDateComparable <= today;
-      }
-      return false;
+    // Filter last 7 days for clicks/impressions/orders
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(today.getDate() - 7);
+
+    const recentData = allData.filter((r) => {
+      const dbDate = parseDbDate(r.date);
+      return dbDate && dbDate >= sevenDaysAgo && dbDate <= today;
     });
 
-    // Stats calculation
-    const totalClicks = data.reduce((a, b) => a + b.clicks, 0);
-    const totalImpressions = data.reduce((a, b) => a + b.impressions, 0);
-    const totalOrders = data.reduce((a, b) => a + b.orders, 0);
-    const totalEarnings = data.reduce((a, b) => a + b.earning, 0);
-    const activeVendors = [...new Set(data.map(r => r.client))].length;
+    // Stats calculation for recent data
+    const totalClicks = recentData.reduce((sum, r) => sum + (r.clicks || 0), 0);
+    const totalImpressions = recentData.reduce((sum, r) => sum + (r.impressions || 0), 0);
+    const totalOrders = recentData.reduce((sum, r) => sum + (r.orders || 0), 0);
 
-    // Revenue trend
+    // Total earnings for 30-day revenue trend
+    const revenueData = allData.filter((r) => {
+      const dbDate = parseDbDate(r.date);
+      return dbDate && dbDate >= thirtyDaysAgo && dbDate <= today;
+    });
+
+    const totalEarnings = revenueData.reduce((sum, r) => sum + (r.earning || 0), 0);
     const revenueTrend = {};
-    data.forEach(r => {
-      revenueTrend[r.date] = (revenueTrend[r.date] || 0) + r.earning;
+    revenueData.forEach((r) => {
+      revenueTrend[r.date] = (revenueTrend[r.date] || 0) + (r.earning || 0);
     });
 
-    // Vendor comparison
+    // Vendor comparison for recent data
     const vendorComparison = {};
-    data.forEach(r => {
-      vendorComparison[r.client] = (vendorComparison[r.client] || 0) + r.earning;
+    recentData.forEach((r) => {
+      vendorComparison[r.client] = (vendorComparison[r.client] || 0) + (r.earning || 0);
     });
 
-    // Daily activity
-    const dailyActivity = { Sun:0, Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0 };
-    data.forEach(r => {
-      const parts = r.date.split("/");
-      const dbMonth = parseInt(parts[0]) - 1;
-      const dbDay = parseInt(parts[1]);
-      const dbYear = 2000 + parseInt(parts[2]);
-      const dayName = new Date(dbYear, dbMonth, dbDay).toLocaleString("en-US", { weekday: "short" });
-      dailyActivity[dayName] += r.clicks;
+    // Daily activity (day-wise clicks) for recent data
+    const dailyActivity = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+    recentData.forEach((r) => {
+      const dbDate = parseDbDate(r.date);
+      if (dbDate) {
+        const dayName = dbDate.toLocaleString("en-US", { weekday: "short" });
+        dailyActivity[dayName] += r.clicks || 0;
+      }
     });
 
-    return new Response(JSON.stringify({
-      totalClicks,
-      totalImpressions,
-      totalOrders,
-      totalEarnings,
-      activeVendors,
-      revenueTrend,
-      vendorComparison,
-      dailyActivity,
-      rows: data
-    }), { status: 200 });
-
+    return new Response(
+      JSON.stringify({
+        totalClicks,
+        totalImpressions,
+        totalOrders,
+        totalEarnings,
+        activeVendors: new Set(recentData.map((r) => r.client)).size,
+        revenueTrend,
+        vendorComparison,
+        dailyActivity,
+        rows: recentData,
+      }),
+      { status: 200 }
+    );
   } catch (err) {
     console.error(err);
     return new Response(JSON.stringify({ error: "Stats fetch failed" }), { status: 500 });
