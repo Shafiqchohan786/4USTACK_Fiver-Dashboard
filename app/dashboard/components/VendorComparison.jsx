@@ -18,19 +18,29 @@ export default function VendorComparison() {
       try {
         const res = await fetch("/api/stats"); // Backend route
         const stats = await res.json();
-        if (!stats.error) {
-          const chartData = Object.entries(stats.vendorComparison).map(
-            ([client, earning]) => ({
+
+        if (!stats.error && stats.rows) {
+          // Group impressions by client
+          const groupedData = stats.rows.reduce((acc, row) => {
+            acc[row.client] = (acc[row.client] || 0) + row.impressions;
+            return acc;
+          }, {});
+
+          // Convert into chart-friendly format
+          const chartData = Object.entries(groupedData).map(
+            ([client, impressions]) => ({
               vendor: client,
-              value: earning,
+              value: impressions,
             })
           );
+
           setData(chartData);
         }
       } catch (err) {
         console.error("Error fetching vendor data:", err);
       }
     };
+
     fetchVendorData();
   }, []);
 
@@ -51,7 +61,7 @@ export default function VendorComparison() {
   return (
     <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-3xl p-8 shadow-lg w-full max-w-3xl mx-auto border border-gray-200">
       <h3 className="font-bold text-xl text-gray-800 mb-6 text-center">
-        📊 Gigs Comparison (Last 7 Days)
+        📊 Gigs Comparison by Impressions (Last 7 Days)
       </h3>
 
       {/* Scrollable container */}
@@ -77,7 +87,7 @@ export default function VendorComparison() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
                 itemStyle={{ color: "#111827", fontWeight: "500" }}
-                formatter={(value) => `$${value}`}
+                formatter={(value) => `${value} impressions`}
               />
               <Bar
                 dataKey="value"
@@ -86,8 +96,8 @@ export default function VendorComparison() {
               />
               <defs>
                 <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#34d399" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.7} />
+                  <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.9} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.7} />
                 </linearGradient>
               </defs>
             </BarChart>

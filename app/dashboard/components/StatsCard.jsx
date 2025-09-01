@@ -90,7 +90,7 @@ export default function StatsCards() {
 
       {/* Note below cards */}
       <p className="text-xs text-gray-500 mt-4">
-        Note: This data represents the last 7 days.
+        Note: Showing last 7 days' data.
       </p>
     </div>
   );

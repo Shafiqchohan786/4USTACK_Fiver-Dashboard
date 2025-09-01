@@ -51,7 +51,14 @@ export default function DashboardUpload({ onUploaded }) {
         setFileName("");
 
         // Callback to refresh dashboard after upload
-        if (onUploaded) onUploaded();
+        if (onUploaded) {
+          onUploaded();
+        }
+
+        // 🔄 Auto-refresh page
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
       } else {
         setMessage(`❌ Upload failed: ${data.error || "Unknown error"}`);
       }
