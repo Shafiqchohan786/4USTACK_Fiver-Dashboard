@@ -34,7 +34,10 @@ export const GET = async () => {
 
     // Stats calculation for recent data
     const totalClicks = recentData.reduce((sum, r) => sum + (r.clicks || 0), 0);
-    const totalImpressions = recentData.reduce((sum, r) => sum + (r.impressions || 0), 0);
+    const totalImpressions = recentData.reduce(
+      (sum, r) => sum + (r.impressions || 0),
+      0
+    );
     const totalOrders = recentData.reduce((sum, r) => sum + (r.orders || 0), 0);
 
     // Total earnings for 30-day revenue trend
@@ -43,27 +46,51 @@ export const GET = async () => {
       return dbDate && dbDate >= thirtyDaysAgo && dbDate <= today;
     });
 
-    const totalEarnings = revenueData.reduce((sum, r) => sum + (r.earning || 0), 0);
+    const totalEarnings = revenueData.reduce(
+      (sum, r) => sum + (r.earning || 0),
+      0
+    );
     const revenueTrend = {};
     revenueData.forEach((r) => {
-      revenueTrend[r.date] = (revenueTrend[r.date] || 0) + (r.earning || 0);
+      revenueTrend[r.date] =
+        (revenueTrend[r.date] || 0) + (r.earning || 0);
     });
 
     // Vendor comparison for recent data
     const vendorComparison = {};
     recentData.forEach((r) => {
-      vendorComparison[r.client] = (vendorComparison[r.client] || 0) + (r.earning || 0);
+      vendorComparison[r.client] =
+        (vendorComparison[r.client] || 0) + (r.earning || 0);
     });
 
     // Daily activity (day-wise clicks) for recent data
-    const dailyActivity = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+    const dailyActivity = {
+      Sun: 0,
+      Mon: 0,
+      Tue: 0,
+      Wed: 0,
+      Thu: 0,
+      Fri: 0,
+      Sat: 0,
+    };
     recentData.forEach((r) => {
       const dbDate = parseDbDate(r.date);
       if (dbDate) {
-        const dayName = dbDate.toLocaleString("en-US", { weekday: "short" });
+        const dayName = dbDate.toLocaleString("en-US", {
+          weekday: "short",
+        });
         dailyActivity[dayName] += r.clicks || 0;
       }
     });
+
+    // Sort rows by client number (Sh01 -> 1, Sh02 -> 2 … Sh20 -> 20)
+    const extractClientNum = (str) => {
+      const match = str.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    };
+    recentData.sort(
+      (a, b) => extractClientNum(a.client) - extractClientNum(b.client)
+    );
 
     return new Response(
       JSON.stringify({
@@ -81,6 +108,9 @@ export const GET = async () => {
     );
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: "Stats fetch failed" }), { status: 500 });
+    return new Response(
+      JSON.stringify({ error: "Stats fetch failed" }),
+      { status: 500 }
+    );
   }
 };

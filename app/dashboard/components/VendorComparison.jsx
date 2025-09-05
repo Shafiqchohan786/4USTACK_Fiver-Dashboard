@@ -52,11 +52,14 @@ export default function VendorComparison() {
     );
   }
 
-  // Calculate chart width: max 15 bars visible at once, each bar 60px + spacing
-  const barWidth = 60;
-  const maxVisibleBars = 15;
+  // Chart sizing logic
+  const barWidth = 60; // per gig width
+  const maxVisibleBars = 12;
+  const totalBars = data.length;
   const chartWidth =
-    data.length > maxVisibleBars ? data.length * barWidth : "100%";
+    totalBars > maxVisibleBars
+      ? `${totalBars * barWidth}px`
+      : "100%";
 
   return (
     <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-3xl p-8 shadow-lg w-full max-w-3xl mx-auto border border-gray-200">
@@ -64,9 +67,15 @@ export default function VendorComparison() {
         📊 Gigs Comparison by Impressions (Last 7 Days)
       </h3>
 
-      {/* Scrollable container */}
-      <div className="overflow-x-auto">
-        <div style={{ minWidth: chartWidth, height: 320 }}>
+      {/* Horizontal scroll if >12 gigs */}
+      <div className="overflow-x-auto overflow-y-hidden">
+        <div
+          style={{
+            width: chartWidth,
+            minWidth: `${maxVisibleBars * barWidth}px`,
+            height: 320,
+          }}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} barSize={50}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
